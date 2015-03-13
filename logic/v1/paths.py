@@ -4,19 +4,16 @@ def path_repr(path):
 		path
 	))
 
-def group_repr(group):
-	pass
-
 def vertices_cost(path):
 	return sum(list(map(lambda vertex: vertex.cost, path)))	
 
 def edges_cost(path):
 	edges_cost = 0
 	for id in range(len(path) - 1):
-		for descendant in path[id].descendants:
-			if descendant['descendant'].id == path[id+1].id:
-				edges_cost += descendant['cost']
-				break
+		edges_cost += list(filter(
+			lambda descendant: descendant['descendant'].id == path[id+1].id,
+			path[id].descendants
+		))[0]['cost']
 	return edges_cost
 
 def total_cost(path):
