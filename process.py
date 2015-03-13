@@ -1,31 +1,34 @@
 import json
 from models.vertex import Vertex
-from models.threads import *
+from logic.vertices import *
+from logic.paths import *
+from logic.matrix import *
 
-data = json.load(open('in.json', 'r'))
+filename = 'in.json'
 
-vertices = list(Vertex(vertex) for vertex in data['vertices'])
+data = json.load(open(filename, 'r'))
 
-for vertex in vertices:
-	out_edges = list(filter(lambda x: x['begin'] == vertex.id , data['edges']))
-	in_edges = list(filter(lambda x: x['end'] == vertex.id , data['edges']))
-	if len(out_edges) > 0:
-		vertex.operator = out_edges[0]['operator']
+vertices = vertices(data)
+paths = paths(vertices)
+groups = groups(paths)
 
-	ascendant_identifiers = list(map(lambda x: x['begin'], in_edges))
-	descendant_identifiers = list(map(lambda x: x['end'], out_edges))
-	descendant_costs = list(map(lambda x: x['cost'], out_edges))
-	descendant_vertices = list(filter(lambda x: x.id in descendant_identifiers, vertices))
-	descendants = list(zip(descendant_vertices, descendant_costs))
+# for key in sorted(groups.keys()):
+# 	print(key)
+# 	for path in sorted(groups[key], key=lambda path: edges_cost(path)):
+# 		print(
+# 			str(prepr(path)).ljust(25),
+# 			"vertex cost = {}".format(vertices_cost(path)).ljust(20),
+# 			"edges cost = {}".format(edges_cost(path)).ljust(20),
+# 			"total cost = {}".format(total_cost(path)).ljust(20)
+# 		)
+# 	print('\n')
 
-	vertex.descendants = list(map(lambda x: dict(zip(['descendant', 'cost'], x)), descendants))
-	vertex.ascendants = list(filter(lambda x: x.id in ascendant_identifiers, vertices))
+target = max(paths, key=lambda path: edges_cost(path))
+print(
+	str(path_repr(target)).ljust(25),
+	"edges cost = {}".format(edges_cost(target)).ljust(20)
+)
 
-	print(vertex)
+seq(filename)
 
-groups = group_threads(threads(vertices))
-
-for key in sorted(groups.keys()):
-	print(key)
-	for thread in groups[key]:
-		print("{}, cost = {}".format(trepr(thread), total_cost(thread)))
+# выделение нити максимальной длины и свертка графа
