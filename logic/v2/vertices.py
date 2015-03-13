@@ -1,4 +1,4 @@
-def connections(edges, vertex_id, target):
+def connections(edges, vertex_id, target='outcoming'):
 	if target in ('incoming', 'outcoming'):
 		modifier = 'begin' if target is 'outcoming' else 'end'
 		return list(filter(

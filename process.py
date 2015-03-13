@@ -1,15 +1,11 @@
 import json
 import logic.v2.matrix as matrix
 
-filename = 'in.json'
-data = json.load(open(filename, 'r'))
+data = json.load(open('in.json', 'r'))
 
-vertices = data['vertices']
-edges = data['edges']
-
+ESM = matrix.sequence_extended(data)
 # paths = paths(vertices)
 # groups = groups(paths)
-seq_matr = matrix.sequence(data)
 # matr.save_seq(seq_matrix)
 
 # # for path in sorted(paths):
