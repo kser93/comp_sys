@@ -1,11 +1,16 @@
 import json
-import logic.v2.matrix as matrix
+from logic.paths import *
+import logic.matrix as matrix
+from pprint import pprint
 
 data = json.load(open('in.json', 'r'))
-
+# ESM - extended sequence matrix
 ESM = matrix.sequence_extended(data)
-# paths = paths(vertices)
-# groups = groups(paths)
+
+paths = paths(data['vertices'])
+groups = groups(paths)
+
+pprint(groups)
 # matr.save_seq(seq_matrix)
 
 # # for path in sorted(paths):

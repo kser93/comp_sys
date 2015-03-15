@@ -3,10 +3,10 @@ def edges(data):
 	for i in range(1, len(data['vertices']) + 1):
 		line = list()
 		for j in range(1, len(data['vertices']) + 1):
-			line.append(None)
-			for edge in data['edges']:
-				if edge['begin'] == i and edge['end'] == j:
-					line[-1] = edge['cost']
-					break
+			edge_ij = list(filter(
+				lambda edge: edge['begin'] == i and edge['end'] == j,
+				data['edges']
+			))
+			line.append(None if not edge_ij else edge_ij[0]['cost'])
 		edges.append(line)
 	return edges
