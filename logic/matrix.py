@@ -5,7 +5,7 @@ def sequence(data):
 			lambda x: x[i],
 			data['edges']
 		))
-		line = list(x if x is not None else 0 for x in line)
+		line = list(0 if x is None else 1 for x in line)
 		matrix.append(line)
 	return matrix
 
