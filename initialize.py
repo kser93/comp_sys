@@ -1,6 +1,6 @@
 import json
-from logic.v2.vertices import vertices as upgrade_vertices
-from logic.v2.edges import edges as upgrade_edges
+from logic.vertices import vertices as upgrade_vertices
+from logic.edges import edges as upgrade_edges
 
 print("This script allows you to input the initial data into the script. Please, follow instructions.")
 vertices_number = int(input("How much vertices do you have? >"))
