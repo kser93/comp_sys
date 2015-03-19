@@ -1,8 +1,8 @@
 def edges(data):
 	edges = list()
-	for i in range(1, len(data['vertices']) + 1):
+	for i in range(0, len(data['vertices']) + 1):
 		line = list()
-		for j in range(1, len(data['vertices']) + 1):
+		for j in range(0, len(data['vertices']) + 1):
 			edge_ij = list(filter(
 				lambda edge: edge['begin'] == i and edge['end'] == j,
 				data['edges']

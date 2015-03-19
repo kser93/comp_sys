@@ -40,4 +40,4 @@ def vertices(data):
 				)
 			)
 		)
-	return vertices
+	return [None] + vertices
