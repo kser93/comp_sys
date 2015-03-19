@@ -1,25 +1,21 @@
 def paths(vertices, **kwargs):
+	"""finding paths from list of 'start' vertices to list of 'finish' vertices"""
+	def outer_vertices(kind):
+		missing = lambda x: 'incoming' if x is 'start' else 'outcoming' if x is 'finish' else None
+		outer = list(filter(lambda vertex: not vertex[missing(kind)], vertices))
+		return [i + 1 for i, x in enumerate(vertices) if x in outer]
+
 	start=kwargs.get('start', None)
+	finish=kwargs.get('finish', None)
+	
 	if start is None:
-		start = [i + 1 for i, x in enumerate(vertices) if x in list(filter(lambda x: not x['incoming'], vertices))]
-		paths = [[x] for x in start]
-	elif type(start) is list:
-		paths = [[x] for x in start]
-	elif type(start) is int:
-		start = [start]
-		paths = [start]
-	else:
+		start = outer_vertices('start')
+	if finish is None:
+		finish = outer_vertices('finish')
+	if type(start) is not list or type(finish) is not list:
 		raise ValueError("Wrong arguments!")
 
-	finish=kwargs.get('finish', None)
-	if finish is None:
-		finish = [i + 1 for i, x in enumerate(vertices) if x in list(filter(lambda x: not x['outcoming'], vertices))]
-	elif type(finish) is list:
-		pass
-	elif type(finish) is int:
-		finish = [finish]
-	else:
-		raise ValueError("Wrong arguments!")
+	paths = [[x] for x in start]
 
 	for path in paths:
 		outcoming = vertices[path[-1]-1]['outcoming']

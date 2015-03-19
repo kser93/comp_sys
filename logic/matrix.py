@@ -18,9 +18,7 @@ def transitive(sequence):
 
 def incompatible(vertices, seq):
 	LOL = list(filter(lambda x: x['function']['outcoming'] is '+', vertices))
-	LOL = list(map(lambda x: vertices.index(x), LOL))
 	for CLO in LOL:
-		CLOO = vertices[CLO]['outcoming']
-		branches = [[y] + [i + 1 for i, x in enumerate(list(zip(*seq))[y-1]) if x] for y in CLOO]
+		branches = [[y] + [i + 1 for i, x in enumerate(list(zip(*seq))[y-1]) if x] for y in CLO['outcoming']]
 		BI = list(reduce(set.intersection, [set(branch) for branch in branches]))
-		pprint(paths(vertices, start=CLO+1, finish=min(BI) if BI else None))
+		pprint(paths(vertices, start=[vertices.index(CLO)+1], finish=[min(BI)] if BI else None))
