@@ -3,7 +3,7 @@ from logic.paths import paths
 from logic.matrix import TSM, incompatible
 from pprint import pprint
 
-data = json.load(open('in1.json', 'r'))
+data = json.load(open('in.json', 'r'))
 # pprint(data['vertices'], compact=True)
 # print(len(data['vertices']))
 # pprint(data['edges'], compact=True, width=100)
