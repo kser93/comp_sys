@@ -1,5 +1,8 @@
 def paths(vertices, **kwargs):
-	"""finding paths from list of 'start' vertices to list of 'finish' vertices"""
+	"""
+	Finding paths from list of 'start' vertices to list of 'finish' vertices
+	Example: paths(vertices, start=[2,3,7], finish=[14,23])
+	"""
 	def outer_vertices(kind):
 		missing = lambda x: 'incoming' if x is 'start' else 'outcoming' if x is 'finish' else None
 		outer = list(filter(lambda vertex: not vertex[missing(kind)], vertices))
@@ -21,5 +24,5 @@ def paths(vertices, **kwargs):
 		outcoming = vertices[path[-1]-1]['outcoming']
 		if outcoming:
 			paths += list(map(lambda x: path + [x], outcoming))
-	condition = lambda path: path[0] in start and path[-1] in finish
+	condition = lambda path: path[0] in start and path[-1] in finish and len(path) > 1
 	return sorted(list(filter(condition, paths)))
