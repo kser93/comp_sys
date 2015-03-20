@@ -1,17 +1,13 @@
 import json
 from logic.paths import paths
-from logic.matrix import TSM, incompatible
+from logic.matrix import TSM
+from logic.execution_time import execution_time
 from pprint import pprint
 
 data = json.load(open('in.json', 'r'))
-# pprint(data['vertices'], compact=True)
-# print(len(data['vertices']))
-# pprint(data['edges'], compact=True, width=100)
-# print(len(data['edges']))
 
 SM = TSM((data['vertices']))
-pprint(SM, compact=True, width=100)
-# ILOM - incompatible logical operator matrix
-# all_paths = paths(data['vertices'])
-# incompatible(data['vertices'], SM)
-# pprint(paths(data['vertices'], start=[13], finish=[13]))
+# pprint(SM, compact=True, width=100)
+times = execution_time(data['vertices'])
+for i in range(1, len(data['vertices'])):
+	print('Vertex {}: before: {}\tafter: {}'.format(i, times['before'][i], times['after'][i]))

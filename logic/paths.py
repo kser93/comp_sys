@@ -4,13 +4,11 @@ def paths(vertices, **kwargs):
 
 	def outer_vertices(kind):
 		missing = lambda x: 'incoming' if x is 'start' else 'outcoming' if x is 'finish' else None
-		outer = list(filter(lambda vertex: not vertex[missing(kind)], vertices))
+		outer = list(filter(lambda vertex: vertex and not vertex[missing(kind)], vertices))
 		return [i for i, x in enumerate(vertices) if x in outer]
 
 	start=kwargs.get('start', None)
 	finish=kwargs.get('finish', None)
-	if start == [0] or finish == [0]:
-		return None
 	if start is None:
 		start = outer_vertices('start')
 	if finish is None:
