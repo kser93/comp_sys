@@ -1,7 +1,5 @@
 from logic.paths import paths
 from pprint import pprint
-from operator import itemgetter as it_g
-from itertools import groupby
 
 def TSM(vertices):
 	"""Returns a transitive sequence matrix for vertices structure"""
