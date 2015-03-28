@@ -18,7 +18,7 @@ def paths(vertices, **kwargs):
 
 	paths = [[x] for x in start]
 	for path in paths:
-		outcoming = vertices[path[-1]]['outcoming']
+		outcoming = [v['outcoming'] for v in vertices if v['id'] == path[-1]][0]
 		if outcoming:
 			paths += list(map(lambda x: path + [x], outcoming))
 	condition = lambda path: path[0] in start and path[-1] in finish and len(path) > 1

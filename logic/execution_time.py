@@ -9,7 +9,7 @@ def execution_time(vertices):
 		'+': lambda vertex: min(precs(vertex))
 	}
 	operator = lambda vertex: vertex['function']['incoming']
-	for vertex in vertices[1:]:
+	for vertex in vertices:
 		before.append(functor[operator(vertex)](vertex))
 		after.append(before[-1] + vertex['cost'])
 	return dict(before=before, after=after)

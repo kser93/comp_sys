@@ -31,6 +31,7 @@ def vertices(data):
 		outc = connections(data, raw_vertex['id'], 'outcoming')
 		vertices.append(
 			dict(
+				id=data['vertices'].index(raw_vertex) + 1,
 				cost=raw_vertex['cost'],
 				incoming=inc['target'],
 				outcoming=outc['target'],
@@ -40,4 +41,4 @@ def vertices(data):
 				)
 			)
 		)
-	return [None] + vertices
+	return vertices

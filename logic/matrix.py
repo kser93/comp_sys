@@ -1,10 +1,9 @@
 from logic.paths import paths
 from pprint import pprint
 
-def TSM(vertices):
+def TSM(V):
 	"""Returns a transitive sequence matrix for vertices structure"""
-	vr = range(1, len(vertices))
-	return [None] + [[None] + [1 if paths(vertices, start=[i], finish=[j]) else 0 for j in vr] for i in vr]
+	return [[1 if paths(V, start=[i['id']], finish=[j['id']]) else 0 for j in V] for i in V]
 
 # def incompatible(vertices, seq):
 # 	LOL = list(filter(lambda x: x and x['function']['outcoming'] is '+', vertices))
