@@ -1,25 +1,28 @@
-def paths(vertices, **kwargs):
-	"""Finding paths from list of 'start' vertices to list of 'finish' vertices
-	Example: paths(vertices, start=[2,3,7], finish=[14,23])"""
+def find_paths(vertices, **kwargs):
+    """Finding paths from list of 'start' vertices to list of 'finish' vertices
+    Example: print(find_paths(data['vertices'], start=[2, 3, 7], finish=[14, 23]))"""
 
-	def outer_vertices(kind):
-		missing = lambda x: 'incoming' if x is 'start' else 'outcoming' if x is 'finish' else None
-		outer = list(filter(lambda vertex: vertex and not vertex[missing(kind)], vertices))
-		return [i for i, x in enumerate(vertices) if x in outer]
+    def outer_vertices(kind):
+        missing = lambda x: 'incoming' if x is 'start' else 'outcoming' if x is 'finish' else None
+        outer = list(filter(lambda vertex: vertex and not vertex[missing(kind)], vertices))
+        return [i for i, x in enumerate(vertices) if x in outer]
 
-	start=kwargs.get('start', None)
-	finish=kwargs.get('finish', None)
-	if start is None:
-		start = outer_vertices('start')
-	if finish is None:
-		finish = outer_vertices('finish')
-	if type(start) is not list or type(finish) is not list:
-		raise ValueError("Wrong arguments!")
+    start = kwargs.get('start', None)
+    finish = kwargs.get('finish', None)
+    if start is None:
+        start = outer_vertices('start')
+    if finish is None:
+        finish = outer_vertices('finish')
+    if type(start) is not list or type(finish) is not list:
+        raise ValueError("Wrong arguments!")
 
-	paths = [[x] for x in start]
-	for path in paths:
-		outcoming = [v['outcoming'] for v in vertices if v['id'] == path[-1]][0]
-		if outcoming:
-			paths += list(map(lambda x: path + [x], outcoming))
-	condition = lambda path: path[0] in start and path[-1] in finish and len(path) > 1
-	return sorted(list(filter(condition, paths)))
+    paths = [[x] for x in start]
+    for path in paths:
+        try:
+            outcoming = next(v['outcoming'] for v in vertices if v['id'] == path[-1])
+            if outcoming:
+                paths += list(map(lambda x: path + [x], outcoming))
+        except StopIteration:
+            pass
+    condition = lambda path: path[0] in start and path[-1] in finish and len(path) > 1
+    return sorted(list(filter(condition, paths)))
