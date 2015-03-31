@@ -1,10 +1,11 @@
 import json
+from logic.paths import find_paths
+from logic.matrix import TSM
+from logic.execution_time import all_vertices_time, threads_time
+from logic.threads import elementary_threads
 from pprint import pprint
 
-from logic.execution_time import threads_time
-from logic.threads import elementary_threads
-from logic.threads_merge import merge
-
+from logic.upgrade_initial import upgrade_vertices, upgrade_edges
 
 data = json.load(open('in.json', 'r'))
 
@@ -19,9 +20,9 @@ data = json.load(open('in.json', 'r'))
 #
 # pprint(TSM(data['vertices']), compact=True, width=100)
 # pprint(elementary_threads(data['edges']))
-el_threads = dict(zip(
-    threads_time(data['vertices'], elementary_threads(data['edges'])),
-    elementary_threads(data['edges'])
-))
+el_threads = dict(
+    times=threads_time(data['vertices'], elementary_threads(data['edges'])),
+    threads=elementary_threads(data['edges'])
+)
 pprint(el_threads)
-merge(el_threads)
+# pprint(threads_time(data['vertices'], elementary_threads(data['edges'])))

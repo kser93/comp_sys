@@ -95,3 +95,19 @@ def elementary_threads(edges):
         create_thread(start=i, finish=i, elements=[i])
         for i in range(1, len(edges) + 1) if i not in visited
     ]
+
+
+def connection_cost_between_two_threads(edges, t1, t2):
+    """Returns maximal cost of edges between threads t1 and t2 or None if edge doesn't exist"""
+    if t1 == t2:
+        return 0
+    costs = list(filter(
+        lambda x: x,
+        [edges[i-1][j-1] for i in t1['elements'] for j in t2['elements']]
+    ))
+    return max(costs) if len(costs) > 0 else None
+
+
+def connections_between_threads(edges, threads):
+    """Returns table of connections between threads"""
+    return [[connection_cost_between_two_threads(edges, t1, t2) for t2 in threads] for t1 in threads]
