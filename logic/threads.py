@@ -1,14 +1,9 @@
+from functools import partial
 from itertools import chain
 
 
 def elementary_threads(edges):
     """Returns threads of vertices with maximal edge cost"""
-    def create_thread(start, finish, elements):
-        return dict(
-            start=start,
-            finish=finish,
-            elements=sorted(elements)
-        )
 
     def edges_sorted_by_cost():
         result = [
@@ -22,51 +17,82 @@ def elementary_threads(edges):
         ]
         return sorted(chain(*result), key=lambda t: t[1], reverse=True)
 
+    def create_thread(start, finish, elements):
+        return dict(
+            start=start,
+            finish=finish,
+            elements=sorted(elements)
+        )
+
+    def insert_to_thread(end):
+        (first, last, thread) = \
+            ('start', 'finish', prev_thread) if end is 'finish' else\
+            ('finish', 'start', next_thread) if end is 'start' else tuple([None]*3)
+        (start, finish) = \
+            (thread()[first], edge_end(last)) if end is 'finish' else\
+            (edge_end(last), thread()[first]) if end is 'start' else tuple([None]*2)
+        elements = \
+            thread()['elements'] + [edge_end(last)] if end is 'finish' else\
+            [edge_end(last)] + thread()['elements']
+        threads[threads.index(thread())] = create_thread(
+            start=start,
+            finish=finish,
+            elements=elements
+        )
+
+    threads_points = lambda point: list(map(lambda t: t[point], threads))
+    threads_starts = partial(threads_points, 'start')
+    threads_finishes = partial(threads_points, 'finish')
+
+    edge_end = lambda x: edge[0][0] if x is 'start' else edge[0][1] if x is 'finish' else None
+
+    is_new_thread = lambda: len(set(edge[0]) & set(visited)) is 0
+    is_merge_threads = lambda: edge_end('start') in threads_finishes() and edge_end('finish') in threads_starts()
+
+    connected_thread = lambda x, y: next(t for t in threads if t[x] == edge_end(y))
+    prev_thread = partial(connected_thread, 'finish', 'start')
+    next_thread = partial(connected_thread, 'start', 'finish')
+
     visited = set()
     threads = list()
     for edge in edges_sorted_by_cost():
         is_added = True
-        starts = list(map(lambda t: t['start'], threads))
-        finishes = list(map(lambda t: t['finish'], threads))
 
-        if len(set(edge[0]) & set(visited)) is 0:
-            threads.append(
-                create_thread(start=edge[0][0], finish=edge[0][1], elements=list(edge[0]))
-            )
-        elif edge[0][0] in finishes and edge[0][1] in starts:
-            thread_a = next(t for t in threads if t['finish'] == edge[0][0])
-            thread_b = next(t for t in threads if t['start'] == edge[0][1])
+        if is_new_thread():
             threads.append(
                 create_thread(
-                    start=thread_a['start'],
-                    finish=thread_b['finish'],
-                    elements=list(set(thread_a['elements'] + thread_b['elements']))
+                    start=edge_end('start'),
+                    finish=edge_end('finish'),
+                    elements=list(edge[0])
                 )
             )
-            threads.remove(thread_a)
-            threads.remove(thread_b)
+        elif is_merge_threads():
+            threads.append(
+                create_thread(
+                    start=prev_thread()['start'],
+                    finish=next_thread()['finish'],
+                    elements=list(set(prev_thread()['elements'] + next_thread()['elements']))
+                )
+            )
+            threads.remove(prev_thread())
+            threads.remove(next_thread())
         else:
-            if edge[0][0] in finishes and edge[0][1] not in visited:
-                thread = next(t for t in threads if t['finish'] == edge[0][0])
-                threads[threads.index(thread)] = create_thread(
-                    start=thread['start'],
-                    finish=edge[0][1],
-                    elements=thread['elements'] + [edge[0][1]]
-                )
-            elif edge[0][1] in starts and edge[0][0] not in visited:
-                thread = next(t for t in threads if t['start'] == edge[0][1])
-                threads[threads.index(thread)] = create_thread(
-                    start=edge[0][0],
-                    finish=thread['finish'],
-                    elements=[edge[0][0]]+thread['elements']
-                )
+            if edge_end('start') in threads_finishes() and edge_end('finish') not in visited:
+                try:
+                    insert_to_thread('finish')
+                except StopIteration:
+                    pass
+            elif edge_end('finish') in threads_starts() and edge_end('start') not in visited:
+                try:
+                    insert_to_thread('start')
+                except StopIteration:
+                    pass
             else:
                 is_added = False
         if is_added:
             visited = visited | set(edge[0])
-    for i in range(1, len(edges)+1):
-        if i not in sorted(list(chain(*list(map(lambda x: x['elements'], threads))))):
-            threads.append(
-                create_thread(start=i, finish=i, elements=[i])
-            )
-    return threads
+    print(visited)
+    return threads + [
+        create_thread(start=i, finish=i, elements=[i])
+        for i in range(1, len(edges) + 1) if i not in visited
+    ]

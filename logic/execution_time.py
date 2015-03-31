@@ -1,4 +1,4 @@
-def execution_time(vertices):
+def all_vertices_time(vertices):
     before = [None]
     after = [None]
     precs = lambda vertex: list(after[i] for i in vertex['incoming'])
@@ -13,3 +13,12 @@ def execution_time(vertices):
         before.append(functor[operator(vertex)](vertex))
         after.append(before[-1] + vertex['cost'])
     return dict(before=before, after=after)
+
+
+def threads_time(vertices, threads):
+    return [
+        (
+            all_vertices_time(vertices)['before'][thread['start']],
+            all_vertices_time(vertices)['after'][thread['finish']]
+        ) for thread in threads
+    ]

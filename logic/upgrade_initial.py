@@ -1,3 +1,7 @@
+def ids(length):
+    return [x + 1 for x in range(length)]
+
+
 def upgrade_vertices(data):
     def connections(vertex, target):
         if target not in ('incoming', 'outcoming'):
@@ -45,14 +49,12 @@ def upgrade_edges(data):
             ))
         ))
 
-    ids = [x + 1 for x in range(len(data['vertices']))]
-
     return [
         [
             next(x for x in outcoming(Id) if x['end'] == i)['cost']
             if i in list(map(lambda x: x['end'], outcoming(Id)))
             else None
-            for i in ids
+            for i in ids(len(data['vertices']))
         ]
-        for Id in ids
+        for Id in ids(len(data['vertices']))
     ]
