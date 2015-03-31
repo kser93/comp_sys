@@ -2,6 +2,14 @@ from functools import partial
 from itertools import chain
 
 
+def create_thread(start, finish, elements):
+    return dict(
+        start=start,
+        finish=finish,
+        elements=sorted(elements)
+    )
+
+
 def elementary_threads(edges):
     """Returns threads of vertices with maximal edge cost"""
 
@@ -16,13 +24,6 @@ def elementary_threads(edges):
             for line in edges
         ]
         return sorted(chain(*result), key=lambda t: t[1], reverse=True)
-
-    def create_thread(start, finish, elements):
-        return dict(
-            start=start,
-            finish=finish,
-            elements=sorted(elements)
-        )
 
     def insert_to_thread(end):
         (first, last, thread) = \
