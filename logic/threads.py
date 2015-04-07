@@ -170,10 +170,8 @@ def split_into_threads(vertices, edges):
 
 
 def connections_between_threads(edges, threads):
-    """Returns table of connections between threads"""
 
     def connection_cost_between_two_threads(t1, t2):
-        """Returns maximal cost of edges between threads t1 and t2 or None if edge doesn't exist"""
         if t1 is t2:
             return 0
         costs = [edges[i-1][j-1] for i in t1['elements'] for j in t2['elements'] if edges[i-1][j-1]]
