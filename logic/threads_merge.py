@@ -1,8 +1,8 @@
 from itertools import chain
-from logic.threads import create_thread
+from logic.threads_new import create_thread
 
 
-def merge(threads):
+def merge_by_time(threads):
     result = []
     while len(threads) > 0:
         thread = []

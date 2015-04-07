@@ -1,23 +1,61 @@
 from functools import partial
 from itertools import chain
+from pprint import pprint
 
-from logic.threads_new import create_thread, merge_logical_branches
+
+def sort_by_cost(edges):
+    result = [
+        [
+            (
+                (edges.index(line) + 1, line.index(el) + 1),
+                el
+            ) for el in line if el
+        ]
+        for line in edges
+    ]
+    return sorted(chain(*result), key=lambda t: t[1], reverse=True)
+
+
+def create_thread(start, finish, elements):
+    return dict(
+        start=start,
+        finish=finish,
+        elements=sorted(elements)
+    )
+
+
+def elementary_threads(vertices):
+    return [
+        create_thread(
+            start=vertex['id'],
+            finish=vertex['id'],
+            elements=[vertex['id']],
+        )
+        for vertex in vertices
+    ]
+
+
+def merge_logical_branches(vertices):
+
+    lb_sources = list(filter(lambda x: x['function']['outcoming'] is '+', vertices))
+    threads = []
+    for vertex in lb_sources:
+        children = list(filter(lambda x: x['id'] in vertex['outcoming'], vertices))
+        thread_finishes = [child for child in children if child['function']['incoming'] is 'E']
+        if len(thread_finishes) > 1:
+            threads += [
+                create_thread(
+                    start=vertex['id'],
+                    finish=finish['id'],
+                    elements=[vertex['id'], finish['id']]
+                )
+                for finish in thread_finishes
+            ]
+    return threads
 
 
 def merge_by_edge_cost(vertices, edges):
     """Returns threads of vertices with maximal edge cost"""
-
-    def edges_sorted_by_cost():
-        result = [
-            [
-                (
-                    (edges.index(line) + 1, line.index(el) + 1),
-                    el
-                ) for el in line if el
-            ]
-            for line in edges
-        ]
-        return sorted(chain(*result), key=lambda t: t[1], reverse=True)
 
     def insert_to_thread(end):
         (first, last, thread) = \
@@ -65,13 +103,9 @@ def merge_by_edge_cost(vertices, edges):
     prev_thread = partial(connected_thread, 'finish', 'start')
     next_thread = partial(connected_thread, 'start', 'finish')
 
-    visited = set(chain(*merge_logical_branches(vertices)))
-    threads = [create_thread(
-        start=min(thread),
-        finish=max(thread),
-        elements=thread
-    ) for thread in merge_logical_branches(vertices)]
-    for edge in edges_sorted_by_cost():
+    threads = merge_logical_branches(vertices)
+    visited = set(chain(*[thread['elements'] for thread in threads]))
+    for edge in sort_by_cost(edges):
         if is_new_thread():
             threads.append(
                 create_thread(
@@ -90,23 +124,29 @@ def merge_by_edge_cost(vertices, edges):
         else:
             continue
         visited = visited | set(edge[0])
+    mergeable = []
+    for t1 in threads:
+        for t2 in threads:
+            if t1 is not t2 and (t2, t1) not in mergeable and len(list(set(t1['elements']) & set(t2['elements']))):
+                mergeable.append((t1, t2))
+    for (t1, t2) in mergeable:
+        threads.append(
+            create_thread(
+                start=min(t1['start'], t2['start']),
+                finish=max(t1['finish'], t2['finish']),
+                elements=list(set(t1['elements']) | set(t2['elements']))
+            )
+        )
+        # print(threads)
+        threads.remove(t1)
+        threads.remove(t2)
+
     return threads + [
         create_thread(start=i, finish=i, elements=[i])
         for i in range(1, len(edges) + 1) if i not in visited
     ]
 
 
-def connection_cost_between_two_threads(edges, t1, t2):
-    """Returns maximal cost of edges between threads t1 and t2 or None if edge doesn't exist"""
-    if t1 == t2:
-        return 0
-    costs = list(filter(
-        lambda x: x,
-        [edges[i-1][j-1] for i in t1['elements'] for j in t2['elements']]
-    ))
-    return max(costs) if len(costs) > 0 else None
-
-
-def connections_between_threads(edges, threads):
-    """Returns table of connections between threads"""
-    return [[connection_cost_between_two_threads(edges, t1, t2) for t2 in threads] for t1 in threads]
+def split_into_threads(vertices, edges):
+    threads = merge_logical_branches(vertices)
+    pass
