@@ -2,13 +2,21 @@ import json
 from pprint import pprint
 from logic.threads import *
 
-data = json.load(open('in.json', 'r'))
 
-threads = split_into_threads(**data)
-result = connections_between_threads(data['edges'], threads)
-
-pprint(threads)
-for line in result:
-    for el in line:
-        print('{} '.format(el if el is not None else '-'), end='')
+def process_and_display(threads, vertices, edges):
+    time = threads_time(vertices, threads)
+    result = connections_between_threads(edges, threads)
+    pprint(threads)
+    for line in result:
+        for el in line:
+            print('{} '.format(el if el is not None else '-'), end='')
+        print()
+    pprint(time)
     print()
+
+data = json.load(open('in.json', 'r'))
+unbalanced_threads = split_into_threads(**data)
+process_and_display(unbalanced_threads, **data)
+
+balanced_threads = balance(data['vertices'], unbalanced_threads)
+process_and_display(balanced_threads, **data)

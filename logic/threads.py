@@ -1,15 +1,16 @@
 from itertools import chain
-from logic.execution_time import threads_time
+from logic.execution_time import threads_time, thread_time
+
+
+def create_thread(start, finish, elements):
+    return dict(
+        start=start,
+        finish=finish,
+        elements=sorted(elements)
+    )
 
 
 def split_into_threads(vertices, edges):
-
-    def create_thread(start, finish, elements):
-        return dict(
-            start=start,
-            finish=finish,
-            elements=sorted(elements)
-        )
 
     def split_logical_branches():
         lb_sources = list(filter(lambda x: x['function']['outcoming'] is '+', vertices))
@@ -28,7 +29,7 @@ def split_into_threads(vertices, edges):
                 ]
         return result
 
-    def merge_by_edge_cost():
+    def merge_by_edge_cost(threads):
 
         def sort_by_cost():
             result = [
@@ -110,7 +111,7 @@ def split_into_threads(vertices, edges):
             for i in [v['id'] for v in vertices] if i not in visited
         ]
 
-    def merge_logical_branches():
+    def merge_logical_branches(threads):
         is_intersects = lambda t1, t2: len(list(set(t1['elements']) & set(t2['elements']))) is not 0
         splitted = [
             (t1, t2) for t1 in threads for t2 in threads
@@ -128,20 +129,24 @@ def split_into_threads(vertices, edges):
             threads.remove(t2)
         return threads
 
-    def merge_by_time():
+    def merge_by_time(threads):
 
         def find_nearest_thread(min_time=0):
             candidates = list(filter(
                 lambda x: x[0] >= min_time,
-                sorted(list(threads.keys()))
+                sorted(list(source.keys()))
             ))
             return (
                 min(candidates),
-                threads.pop(min(candidates))
+                source.pop(min(candidates))
             ) if len(candidates) > 0 else None
 
+        source = dict(zip(
+            threads_time(vertices, threads),
+            threads
+        ))
         result = []
-        while len(threads) > 0:
+        while len(source) > 0:
             thread = []
             nearest_thread = find_nearest_thread()
             while nearest_thread:
@@ -158,15 +163,57 @@ def split_into_threads(vertices, edges):
             for thread in [[x[1] for x in thread] for thread in result]
         ]
 
-    threads = split_logical_branches()
-    threads = merge_by_edge_cost()
-    threads = merge_logical_branches()
-    # threads = merge_logical_branches(merge_by_edge_cost(split_logical_branches()))
-    threads = dict(zip(
-        threads_time(vertices, threads),
-        threads
+    return merge_by_time(merge_logical_branches(merge_by_edge_cost(split_logical_branches())))
+
+
+def balance(vertices, threads):
+    source = sorted(
+        threads,
+        key=lambda thread: thread_time(vertices, thread)[1],
+        reverse=True
+    )
+    critical_thread = source.pop(0)
+    critical_time = thread_time(vertices, critical_thread)[1]
+    candidates_starts = list(map(
+        lambda vertex: vertex['id'],
+        list(filter(
+            lambda vertex: not vertex['incoming'],
+            vertices
+        ))
     ))
-    return merge_by_time()
+    candidates_finishes = list(map(
+        lambda vertex: vertex['id'],
+        list(filter(
+            lambda vertex: not vertex['outcoming'],
+            vertices
+        ))
+    ))
+    candidates = sorted(
+        list(filter(
+            lambda t: t['finish'] in candidates_finishes and t['start'] not in candidates_starts,
+            source
+        )),
+        key=lambda thread: thread_time(vertices, thread)[1] - thread_time(vertices, thread)[0]
+    )
+    [source.remove(candidate) for candidate in candidates]
+    for candidate in candidates:
+        possible_merged = list(filter(
+            lambda t: (critical_time - thread_time(vertices, t)[1]) >= thread_time(vertices, candidate)[1] - thread_time(vertices, candidate)[0],
+            source
+        ))
+        if not possible_merged:
+            continue
+        merged = sorted(
+            possible_merged,
+            key=lambda t: thread_time(vertices, t)[1],
+            reverse=True
+        )[0]
+        source[source.index(merged)] = create_thread(
+            start=min(candidate['start'], merged['start']),
+            finish=max(candidate['finish'], merged['finish']),
+            elements=list(set(candidate['elements']) | set(merged['elements']))
+        )
+    return [critical_thread] + source
 
 
 def connections_between_threads(edges, threads):
