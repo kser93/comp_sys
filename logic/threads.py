@@ -208,11 +208,16 @@ def balance(vertices, threads):
             key=lambda t: thread_time(vertices, t)[1],
             reverse=True
         )[0]
-        source[source.index(merged)] = create_thread(
+        thread = create_thread(
             start=min(candidate['start'], merged['start']),
             finish=max(candidate['finish'], merged['finish']),
             elements=list(set(candidate['elements']) | set(merged['elements']))
         )
+        thread['time'] = (
+            thread_time(vertices, merged)[0],
+            thread_time(vertices, merged)[1] + thread_time(vertices, candidate)[1] - thread_time(vertices, candidate)[0]
+        )
+        source[source.index(merged)] = thread
     return [critical_thread] + source
 
 

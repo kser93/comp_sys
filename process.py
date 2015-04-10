@@ -4,7 +4,7 @@ from logic.threads import *
 
 
 def process_and_display(threads, vertices, edges):
-    time = threads_time(vertices, threads)
+    time = [thread.get('time', thread_time(vertices, thread)) for thread in threads]
     result = connections_between_threads(edges, threads)
     pprint(threads)
     for line in result:
