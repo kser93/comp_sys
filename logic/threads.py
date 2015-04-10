@@ -193,7 +193,7 @@ def balance(vertices, threads):
             lambda t: t['finish'] in candidates_finishes and t['start'] not in candidates_starts,
             source
         )),
-        key=lambda thread: thread_time(vertices, thread)[1] - thread_time(vertices, thread)[0]
+        key=lambda t: thread_time(vertices, t)[1] - thread_time(vertices, t)[0]
     )
     [source.remove(candidate) for candidate in candidates]
     for candidate in candidates:
