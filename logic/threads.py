@@ -1,5 +1,7 @@
+from functools import partial
 from itertools import chain
-from logic.execution_time import threads_time, thread_time
+
+import logic.execution_time
 
 
 def create_thread(start, finish, elements):
@@ -139,10 +141,12 @@ def split_into_threads(vertices, edges):
             return (
                 min(candidates),
                 source.pop(min(candidates))
-            ) if len(candidates) > 0 else None
+            ) if candidates else None
+
+        threads_time = partial(logic.execution_time.threads_time, vertices)
 
         source = dict(zip(
-            threads_time(vertices, threads),
+            threads_time(threads),
             threads
         ))
         result = []
@@ -167,67 +171,57 @@ def split_into_threads(vertices, edges):
 
 
 def balance(vertices, threads):
-    source = sorted(
-        threads,
-        key=lambda thread: thread_time(vertices, thread)[1],
-        reverse=True
-    )
+
+    time_of_thread = partial(logic.execution_time.thread_time, vertices)
+    duration_of_thread = partial(logic.execution_time.thread_duration, vertices)
+
+    def sort_by_time(threads):
+        return sorted(
+            threads,
+            key=lambda t: time_of_thread(t)[1],
+            reverse=True
+        )
+
+    source = sort_by_time(threads)
     critical_thread = source.pop(0)
-    critical_time = thread_time(vertices, critical_thread)[1]
-    candidates_starts = list(map(
-        lambda vertex: vertex['id'],
-        list(filter(
-            lambda vertex: not vertex['incoming'],
-            vertices
-        ))
-    ))
-    candidates_finishes = list(map(
-        lambda vertex: vertex['id'],
-        list(filter(
-            lambda vertex: not vertex['outcoming'],
-            vertices
-        ))
-    ))
+    critical_time = time_of_thread(critical_thread)[1]
+    candidates_starts = [vertex['id'] for vertex in vertices if not vertex['incoming']]
+    candidates_finishes = [vertex['id'] for vertex in vertices if not vertex['outcoming']]
     candidates = sorted(
         list(filter(
             lambda t: t['finish'] in candidates_finishes and t['start'] not in candidates_starts,
             source
         )),
-        key=lambda t: thread_time(vertices, t)[1] - thread_time(vertices, t)[0]
+        key=lambda thread: duration_of_thread(thread)
     )
     [source.remove(candidate) for candidate in candidates]
     for candidate in candidates:
         possible_merged = list(filter(
-            lambda t: (critical_time - thread_time(vertices, t)[1]) >= thread_time(vertices, candidate)[1] - thread_time(vertices, candidate)[0],
+            lambda thread: duration_of_thread(candidate) <= (critical_time - time_of_thread(thread)[1]),
             source
         ))
-        if not possible_merged:
-            continue
-        merged = sorted(
-            possible_merged,
-            key=lambda t: thread_time(vertices, t)[1],
-            reverse=True
-        )[0]
-        thread = create_thread(
-            start=min(candidate['start'], merged['start']),
-            finish=max(candidate['finish'], merged['finish']),
-            elements=list(set(candidate['elements']) | set(merged['elements']))
-        )
-        thread['time'] = (
-            thread_time(vertices, merged)[0],
-            thread_time(vertices, merged)[1] + thread_time(vertices, candidate)[1] - thread_time(vertices, candidate)[0]
-        )
-        source[source.index(merged)] = thread
+        if possible_merged:
+            merged = sort_by_time(possible_merged)[0]
+            thread = create_thread(
+                start=min(candidate['start'], merged['start']),
+                finish=max(candidate['finish'], merged['finish']),
+                elements=list(set(candidate['elements']) | set(merged['elements']))
+            )
+            thread['time'] = (
+                time_of_thread(merged)[0],
+                time_of_thread(merged)[1] + duration_of_thread(candidate)
+            )
+            source[source.index(merged)] = thread
     return [critical_thread] + source
 
 
 def connections_between_threads(edges, threads):
 
     def connection_cost_between_two_threads(t1, t2):
-        if t1 is t2:
-            return 0
-        costs = [edges[i-1][j-1] for i in t1['elements'] for j in t2['elements'] if edges[i-1][j-1]]
-        return max(costs) if len(costs) else None
+        return 0 if t1 is t2 else max(
+            [edges[i-1][j-1] for i in t1['elements'] for j in t2['elements'] if edges[i-1][j-1]],
+            default=None
+        )
 
     return [
         [

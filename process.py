@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 from logic.threads import *
+from logic.execution_time import thread_time
 
 
 def process_and_display(threads, vertices, edges):

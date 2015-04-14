@@ -22,5 +22,10 @@ def thread_time(vertices, thread):
     return min_start, max_finish
 
 
+def thread_duration(vertices, thread):
+    time = thread_time(vertices, thread)
+    return time[1] - time[0]
+
+
 def threads_time(vertices, threads):
     return [thread_time(vertices, thread) for thread in threads]
