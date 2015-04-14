@@ -34,16 +34,17 @@ def split_into_threads(vertices, edges):
     def merge_by_edge_cost(threads):
 
         def sort_by_cost():
-            result = [
-                [
-                    (
-                        (edges.index(line) + 1, line.index(el) + 1),
-                        el
-                    ) for el in line if el
-                ]
-                for line in edges
-            ]
-            return sorted(chain(*result), key=lambda t: t[1], reverse=True)
+            result = []
+            for line_index in range(len(edges)):
+                for el_index in range(line_index, len(edges)):
+                    if edges[line_index][el_index]:
+                        result.append(
+                            (
+                                (line_index + 1, el_index + 1),
+                                edges[line_index][el_index]
+                            )
+                        )
+            return sorted(result, key=lambda t: t[1], reverse=True)
 
         edge_start = lambda: edge[0][0]
         edge_finish = lambda: edge[0][1]

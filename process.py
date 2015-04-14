@@ -16,6 +16,7 @@ def process_and_display(threads, vertices, edges):
     print()
 
 data = json.load(open('in.json', 'r'))
+
 unbalanced_threads = split_into_threads(**data)
 process_and_display(unbalanced_threads, **data)
 
