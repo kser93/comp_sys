@@ -90,7 +90,7 @@ def split_into_threads(vertices, edges):
             threads.remove(prev_thread())
             threads.remove(next_thread())
 
-        appendable = lambda: len(set(edge_ends()) & set(visited)) is 0
+        appendable = lambda: not set(edge_ends()) & set(visited)
         mergeable = lambda: edge_start() in threads_finishes() and edge_finish() in threads_starts()
         insertable_to_finish = lambda: edge_start() in threads_finishes() and edge_finish() not in visited
         insertable_to_start = lambda: edge_finish() in threads_starts() and edge_start() not in visited
@@ -137,10 +137,10 @@ def split_into_threads(vertices, edges):
         def find_nearest_thread(min_time=0):
             candidates = list(filter(
                 lambda x: x[0] >= min_time,
-                sorted(list(source.keys()))
+                sorted_src_keys
             ))
             return (
-                min(candidates),
+                sorted_src_keys.pop(sorted_src_keys.index(min(candidates))),
                 source.pop(min(candidates))
             ) if candidates else None
 
@@ -150,8 +150,10 @@ def split_into_threads(vertices, edges):
             threads_time(threads),
             threads
         ))
+        sorted_src_keys = sorted(threads_time(threads))
+
         result = []
-        while len(source) > 0:
+        while source:
             thread = []
             nearest_thread = find_nearest_thread()
             while nearest_thread:
