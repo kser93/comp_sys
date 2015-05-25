@@ -48,7 +48,7 @@ def upgrade_edges(data):
     return [
         [
             next(x for x in outcoming(j) if x['end'] == i)['cost']
-            if i in list(map(lambda x: x['end'], outcoming(Id)))
+            if i in list(map(lambda x: x['end'], outcoming(i)))
             else None
             for i in range(1, len(data['vertices'])+1)
         ]
