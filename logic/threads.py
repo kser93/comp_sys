@@ -122,6 +122,7 @@ def split_into_threads(vertices, edges):
                     while i < len(merge_candidate["elements"]):
                         thread["elements"].append(merge_candidate["elements"][i])
                         i += 1
+                    thread["elements"] = sorted(thread["elements"])
                     threads.remove(merge_candidate)
         return threads
 
