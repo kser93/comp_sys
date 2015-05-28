@@ -36,21 +36,22 @@ def upgrade_vertices(data):
 
 
 def upgrade_edges(data):
-    def outcoming(i):
+    def outcoming(v):
         return list(map(
             lambda x: dict(end=x['end'], cost=x['cost']),
             list(filter(
-                lambda x: x['begin'] == i,
+                lambda x: x['begin'] == v,
                 data['edges']
             ))
         ))
 
-    return [
-        [
-            next(x for x in outcoming(j) if x['end'] == i)['cost']
-            if i in list(map(lambda x: x['end'], outcoming(i)))
-            else None
-            for i in range(1, len(data['vertices'])+1)
-        ]
-        for j in range(1, len(data['vertices'])+1)
-    ]
+    result = []
+    for j in range(1, len(data['vertices'])+1):
+        for i in range(1, len(data['vertices'])+1):
+            ends = list(map(lambda x: x['end'], outcoming(j)))
+            if i in ends:
+                result.append(next(x for x in outcoming(j) if x['end'] == i)['cost'])
+            else:
+                result.append(None)
+
+    return result
