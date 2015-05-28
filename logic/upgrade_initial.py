@@ -47,11 +47,12 @@ def upgrade_edges(data):
 
     result = []
     for j in range(1, len(data['vertices'])+1):
+        result.append([])
         for i in range(1, len(data['vertices'])+1):
             ends = list(map(lambda x: x['end'], outcoming(j)))
             if i in ends:
-                result.append(next(x for x in outcoming(j) if x['end'] == i)['cost'])
+                result[j - 1].append(next(x for x in outcoming(j) if x['end'] == i)['cost'])
             else:
-                result.append(None)
+                result[j - 1].append(None)
 
     return result
