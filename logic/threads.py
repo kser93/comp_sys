@@ -1,5 +1,6 @@
 from functools import partial
 from itertools import chain
+from pprint import pprint
 
 import logic.execution_time
 
@@ -130,20 +131,21 @@ def split_into_threads(vertices, edges):
         def find_nearest_thread(min_time=0):
             candidates = list(filter(
                 lambda x: x[0] >= min_time,
-                sorted_src_keys
+                sorted(list(source.keys()))
             ))
-            return (
-                sorted_src_keys.pop(sorted_src_keys.index(min(candidates))),
-                source.pop(min(candidates))
-            ) if candidates else None
+            if candidates:
+                return (
+                    min(candidates),
+                    source.pop(min(candidates))
+                )
+            else:
+                return None
 
         threads_time = partial(logic.execution_time.threads_time, vertices)
-
         source = dict(zip(
             threads_time(threads),
             threads
         ))
-        sorted_src_keys = sorted(threads_time(threads))
 
         result = []
         while source:
