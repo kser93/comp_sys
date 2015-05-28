@@ -143,10 +143,17 @@ def split_into_threads(vertices, edges):
                 return None
 
         threads_time = partial(logic.execution_time.threads_time, vertices)
-        source = dict(zip(
-            threads_time(threads),
-            threads
-        ))
+        source = {}
+        for thread in threads:
+            time = threads_time(threads)[threads.index(thread)]
+            while time in list(source.keys()):
+                time = (time[0] + 1, time[1] + 1)
+            print(time)
+            source[time] = thread
+        # source = dict(zip(
+        #     threads_time(threads),
+        #     threads
+        # ))
 
         result = []
         while source:
