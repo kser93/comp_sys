@@ -115,21 +115,14 @@ def split_into_threads(vertices, edges):
         ]
 
     def merge_logical_branches(threads):
-        is_intersects = lambda t1, t2: set(t1['elements']) & set(t2['elements'])
-        splitted = [
-            (t1, t2) for t1 in threads for t2 in threads[threads.index(t1):]
-            if t1 is not t2 and is_intersects(t1, t2)
-        ]
-        for (t1, t2) in splitted:
-            threads.append(
-                create_thread(
-                    start=min(t1['start'], t2['start']),
-                    finish=max(t1['finish'], t2['finish']),
-                    elements=list(set(t1['elements']) | set(t2['elements']))
-                )
-            )
-            threads.remove(t1)
-            threads.remove(t2)
+        for thread in threads:
+            for merge_candidate in threads:
+                if thread["start"] == merge_candidate["start"] and thread["finish"] != merge_candidate["finish"]:
+                    i = 1
+                    while i < len(merge_candidate["elements"]):
+                        thread["elements"].append(merge_candidate["elements"][i])
+                        i += 1
+                    threads.remove(merge_candidate)
         return threads
 
     def merge_by_time(threads):
