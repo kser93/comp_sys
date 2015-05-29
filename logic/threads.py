@@ -131,7 +131,7 @@ def split_into_threads(vertices, edges):
 
         def find_nearest_thread(min_time=0):
             candidates = list(filter(
-                lambda x: x[0] >= min_time,
+                lambda x: x[0][0] >= min_time,
                 sorted(list(source.keys()))
             ))
             if candidates:
@@ -144,10 +144,10 @@ def split_into_threads(vertices, edges):
 
         threads_time = partial(logic.execution_time.threads_time, vertices)
         source = {}
+        unique_id = 0
         for thread in threads:
-            time = threads_time(threads)[threads.index(thread)]
-            while time in list(source.keys()):
-                time = (time[0] + 1, time[1] + 1)
+            time = (threads_time(threads)[threads.index(thread)], unique_id)
+            unique_id += 1
             print(time)
             source[time] = thread
         # source = dict(zip(
@@ -161,7 +161,7 @@ def split_into_threads(vertices, edges):
             nearest_thread = find_nearest_thread()
             while nearest_thread:
                 thread.append(nearest_thread)
-                nearest_thread = find_nearest_thread(nearest_thread[0][1])
+                nearest_thread = find_nearest_thread(nearest_thread[0][0][1])
             result.append(thread)
 
         return [
